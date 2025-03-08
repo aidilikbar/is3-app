@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Academic Paper Search</h2>
+<form method="GET">
+    <input type="text" name="query" placeholder="Enter a search term" value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
+{% if papers %}
+    <h3>Search Results</h3>
+    <ul>
+        {% for paper in papers %}
+            <li>
+                <a href="#" class="paper-link" data-paper-id="{{ paper.paper_id }}">{{ paper.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!-- Paper Details -->
+<div id="paperDetails" style="display: none;">
+    <h4 id="paperTitle"></h4>
+    <p><strong>Year:</strong> <span id="paperYear"></span></p>
+    <p><strong>Authors:</strong> <span id="paperAuthors"></span></p>
+    <p><strong>Abstract:</strong> <span id="paperAbstract"></span></p>
+    <a href="#" id="paperLink" target="_blank">View on Semantic Scholar</a>
+</div>
+
+<script>
+document.querySelectorAll('.paper-link').forEach(link => {
+    link.addEventListener('click', function(event) {
+        event.preventDefault();
+        let paperId = this.getAttribute('data-paper-id');
+
+        fetch(`/papers/details/${paperId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("paperTitle").textContent = data.title;
+            document.getElementById("paperYear").textContent = data.year;
+            document.getElementById("paperAuthors").textContent = data.authors.map(a => a.name).join(", ");
+            document.getElementById("paperAbstract").textContent = data.abstract || "No abstract available.";
+            document.getElementById("paperLink").href = data.url;
+            document.getElementById("paperDetails").style.display = "block";
+        });
+    });
+});
+</script>
+{% endblock %}
